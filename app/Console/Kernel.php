@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         'App\Console\Commands\RegisteredUsers',
+        'App\Console\Commands\UploadCheckInOut',
+        'App\Console\Commands\UploadUsers',
     ];
 
     /**
