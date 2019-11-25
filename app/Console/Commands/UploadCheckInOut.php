@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-
+use App\CheckInOutModel;
 class UploadCheckInOut extends Command
 {
     /**
@@ -38,18 +38,21 @@ class UploadCheckInOut extends Command
     public function handle()
     {
         $clientV1= new \GuzzleHttp\Client();
-        $requestV1 = $clientV1->get('http://192.168.1.141:8000/api/v1/bioTime/checks');
+        $requestV1 = $clientV1->get('http://demo.sysalwaysconnectedusa.com/api/v1/bioTime/checks');
         $responseV1 = json_decode($requestV1->getBody(),true); 
-
-
-
-        $clientV2 = new \GuzzleHttp\Client();
-        $check = CheckInOutModel::select('userid','checktime','upload_time')->where('id',$responseV1['id'])->get();
         
+        if($responseV1){
+               $check = CheckInOutModel::select('userid','checktime','upload_time')->where('userid','>',$responseV1['id'])->get();
+        }else{
+            $check = CheckInOutModel::select('userid','checktime','upload_time')->get();
+        }
+       
+        $clientV2 = new \GuzzleHttp\Client();
         $headers['Content-Type'] = 'application/json';
         $chekdata = json_encode($check);
-        $responseV2 = $clientV2->request('POST', 'http://192.168.1.141:8000/api/v1/bioTime/store', array('headers' => $headers,'body' =>$chekdata));
+        $responseV2 = $clientV2->request('POST', 'http://demo.sysalwaysconnectedusa.com/api/v1/bioTime/store', array('headers' => $headers,'body' =>$chekdata));
         $responseV2 = json_decode($responseV2->getBody(),true);
-        return response()->json($responseV2);
+       
+        echo 'Checks ready';
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\BioTimeUsersModel;
 
 class UploadUsers extends Command
 {
@@ -37,15 +38,31 @@ class UploadUsers extends Command
      */
     public function handle()
     {
+        
         $client = new \GuzzleHttp\Client();
-        $request = $client->get('http://192.168.1.141:8000/api/v1/bioTime/delete_users');
+        $request = $client->get('http://demo.sysalwaysconnectedusa.com/api/v1/bioTime/delete_users');
         $response = json_decode($request->getBody(),true);
-        $rows=count($response);
+  
+        if($response){
+            $rows=count($response);
 
-        for($i = 0; $i < $rows; $i++){
-            $var = BioTimeUsersModel::where('badgenumber',$response[$i]['id'])->first(); 
-            $var->app_status = 0;
-            $var->save();
+            for($i = 0; $i < $rows; $i++){
+                    $a=0;
+                    $valuser = BioTimeUsersModel::where('badgenumber',$response[$i]['id'])->count();
+                    if($valuser > 0) {
+                        $var = BioTimeUsersModel::where('badgenumber',$response[$i]['id'])->first(); 
+                        $var ->app_status = 0;
+                        $var->save();
+                        $a++;
+                    }
+            
+            }
+           $res='Users Update: '.$a;
+           echo $res;
+        }else {
+           $res='Error Users Update: '.$rows;
+           echo $res;
         }
+      
     }
 }
